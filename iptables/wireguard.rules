@@ -1,0 +1,32 @@
+# Base config template for a Wireguard gateway
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [2198:204008]
+:POSTROUTING ACCEPT [0:0]
+# Force the Max Segment Size of all new TCP connections to match the path MTU
+# During interface configuration, the MTU of the Wireguard and outgoing
+# network interfaces should be set to 1280
+# This ensures that each frame has enough available header space for 
+# 6-in-4 address mapping (which is a very common setup still today in 2026)
+-A OUTPUT -o wg+ -p tcp -m tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
+COMMIT
+
+*filter
+:INPUT ACCEPT [4910:351387]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+# Accept all incoming traffic on all Wireguard interfaces
+-A INPUT -i wg+ -j ACCEPT
+COMMIT
+
+*nat
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+# Allow dynamic source NAT
+-A POSTROUTING -o <OUTGOING_INTERFACE> -j MASQUERADE
+COMMIT
+
