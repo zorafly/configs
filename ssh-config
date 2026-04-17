@@ -1,0 +1,21 @@
+# Match all connections
+Host *
+
+#"opportunistic multiplexing: try to use a master connection but fall back to
+# creating a new one if one does not already exist."
+ControlMaster auto
+
+# Path to the control socket used for connection sharing
+ControlPath ~/.ssh/sockets/%r@%h-%p
+
+# Keep master sockets open for one hour max
+ControlPersist 3600
+
+### Use the Yubikey PKCS11 driver
+# (linux path)
+PKCS11Provider /usr/lib/x86_64-linux-gnu/libykcs11.so
+# (macOS Homebrew path)
+# PKCS11Provider /opt/homebrew/Cellar/yubico-piv-tool/*/lib/libykcs11.dylib
+
+# Send empty keep-alive packets every 60 seconds
+ServerAliveInterval 60
